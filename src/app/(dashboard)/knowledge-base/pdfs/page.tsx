@@ -35,28 +35,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { useKnowledgeBase } from "@/hooks/use-knowledgebase"
-
-const data: PDFRow[] = [
-  {
-    id: "m5gr84i9",
-    name: "PDF 1",
-    size: 100,
-    createdAt: new Date("2024-01-01"),
-  },
-  {
-    id: "3u1reuv4",
-    name: "PDF 2",
-    size: 200,
-    createdAt: new Date("2024-01-02"),
-  },
-]
+import { useKnowledgeBase } from "@/hooks/use-knowledge-base"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export type PDFRow = {
   id: string
   name: string
-  size: number
-  createdAt: Date
+  updated_at: Date
 }
 
 export const columns: ColumnDef<PDFRow>[] = [
@@ -90,31 +75,25 @@ export const columns: ColumnDef<PDFRow>[] = [
     ),
   },
   {
-    accessorKey: "size",
+    accessorKey: "updated_at",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Size
+          Last Modified
           <ArrowUpDown />
         </Button>
       )
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("size")}</div>,
-  },
-  {
-    accessorKey: "createdAt",
-    header: () => <div className="text-right">Created At</div>,
     cell: ({ row }) => {
-      const createdAt: Date = row.getValue("createdAt")
-
-      return (
-        <div className="text-right font-medium">
-          {createdAt?.toLocaleDateString()}
-        </div>
-      )
+      const date = new Date(row.getValue("updated_at"));
+      return <div>{date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+      })}</div>;
     },
   },
   {
@@ -149,7 +128,9 @@ export const columns: ColumnDef<PDFRow>[] = [
 ]
 
 export default function KnowledgeBasePDFsPage() {
-  const { uploadFileMutation } = useKnowledgeBase()
+  const { uploadFileMutation, getPDFsQuery } = useKnowledgeBase()
+  const { data, isLoading, isError, isSuccess } = getPDFsQuery
+
   const fileInputRef = React.useRef<HTMLInputElement>(null)
 
   const [sorting, setSorting] = React.useState<SortingState>([])
@@ -159,8 +140,11 @@ export default function KnowledgeBasePDFsPage() {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
+
+  const tableData = isSuccess && data?.data ? data.data : []
+
   const table = useReactTable({
-    data,
+    data: tableData,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -178,11 +162,11 @@ export default function KnowledgeBasePDFsPage() {
     },
   })
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
+
     if (file) {
-      console.log("File selected:", file)
-      uploadFileMutation.mutate(file)
+      uploadFileMutation?.mutate(file)
     }
   }
 
@@ -201,7 +185,7 @@ export default function KnowledgeBasePDFsPage() {
           <Button variant="outline" onClick={() => fileInputRef.current?.click()}>
             Upload PDF
           </Button>
-          <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileChange} />
+          <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileUpload} />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline">
@@ -210,9 +194,9 @@ export default function KnowledgeBasePDFsPage() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
+                ?.getAllColumns()
+                ?.filter((column) => column.getCanHide())
+                ?.map((column) => {
                   return (
                     <DropdownMenuCheckboxItem
                     key={column.id}
@@ -233,25 +217,40 @@ export default function KnowledgeBasePDFsPage() {
       <div className="rounded-md border">
         <Table>
           <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
+            {table.getHeaderGroups()?.map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  )
-                })}
+                {headerGroup.headers?.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {isLoading ? (
+              // Loading state
+              Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={i}>
+                  {columns.map((_, j) => (
+                    <TableCell key={j}>
+                      <Skeleton className="h-4 w-full" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : isError ? (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  Error loading data
+                </TableCell>
+              </TableRow>
+            ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -269,11 +268,8 @@ export default function KnowledgeBasePDFsPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  No results found
                 </TableCell>
               </TableRow>
             )}
