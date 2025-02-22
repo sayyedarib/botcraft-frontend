@@ -3,8 +3,6 @@
 import * as React from "react"
 import { ChevronsUpDown, Plus, User } from "lucide-react"
 
-import { useWorkspaceStore } from "@/stores/workspace-store"
-
 import {
   DropdownMenu,
   DropdownMenuContent,

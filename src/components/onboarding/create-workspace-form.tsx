@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation"
 import { SubmitHandler, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Frame } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -16,7 +15,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { WorkspaceAvatar } from "@/components/onboarding/workspace-avatar"
 import { createWorkspaceSchema, type CreateWorkspaceInput } from "@/lib/validations/workspace"
 import { useWorkspace } from "@/hooks/use-workspace"
 

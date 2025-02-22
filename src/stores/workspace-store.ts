@@ -2,7 +2,6 @@ import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
 import { devtools } from 'zustand/middleware'
-import { useWorkspace } from '@/hooks/use-workspace'
 import { Workspace } from '@/types/workspace'
 
 type WorkspaceState = {
@@ -15,7 +14,6 @@ type WorkspaceState = {
 type WorkspaceActions = {
   setCurrentWorkspaceId: (id: string) => void
   clearCurrentWorkspace: () => void
-  fetchWorkspaces: () => Promise<void>
   addWorkspace: (workspace: Workspace) => void
   removeWorkspace: (id: string) => void
 }
@@ -44,14 +42,6 @@ export const useWorkspaceStore = create<WorkspaceState & WorkspaceActions>()(
         
         clearCurrentWorkspace: () => {
           set({ currentWorkspaceId: null })
-        },
-        
-        fetchWorkspaces: async () => {
-          const { getWorkspacesQuery } = useWorkspace()
-          const { data } = getWorkspacesQuery;
-          if (data) {
-            set({ workspaces: data }) // Access the actual array from the Axios response
-          }
         },
         
         addWorkspace: (workspace) => {

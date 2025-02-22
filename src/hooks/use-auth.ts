@@ -8,8 +8,7 @@ export const useAuth = () => {
   
   const loginMutation = useMutation({
     mutationFn: authAPI.login,
-    onSuccess: (data) => {
-      localStorage.setItem('access_token', data.data.access_token)
+    onSuccess: () => {
       router.push('/dashboard')
     }
   })
@@ -19,5 +18,12 @@ export const useAuth = () => {
     onSuccess: () => router.push('/login?signup_success=true')
   })
 
-  return { loginMutation, signupMutation }
+  const logoutMutation = useMutation({
+    mutationFn: authAPI.logout,
+    onSuccess: () => {
+      router.push('/login')
+    }
+  })
+
+  return { loginMutation, signupMutation, logoutMutation }
 }
