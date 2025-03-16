@@ -1,7 +1,8 @@
-export default function KnowledgeBaseImagesPage({
+export default async function KnowledgeBaseImagesPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
-  return <div>KnowledgeBaseImagesPage {params.id}</div>
+  const { id } = await params;
+  return <div>KnowledgeBaseImagesPage {id}</div>
 }

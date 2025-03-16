@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, MoreHorizontal, Plus } from "lucide-react"
+import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -44,7 +44,8 @@ export type PDFRow = {
   updated_at: Date
 }
 
-export const columns: ColumnDef<PDFRow>[] = [
+// TODO: Move to some centralized location
+const columns: ColumnDef<PDFRow>[] = [
   {
     id: "select",
     header: ({ table }) => (

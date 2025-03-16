@@ -1,7 +1,8 @@
-export default function KnowledgeBaseLinksPage({
+export default async function KnowledgeBaseLinksPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
-  return <div>KnowledgeBaseLinksPage {params.id}</div>
+  const { id } = await params;
+  return <div>KnowledgeBaseLinksPage {id}</div>
 }

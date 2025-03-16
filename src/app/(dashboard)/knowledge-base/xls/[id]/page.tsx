@@ -1,7 +1,8 @@
-export default function KnowledgeBaseXLSPage({
+export default async function KnowledgeBaseXLSPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
-  return <div>KnowledgeBaseXLSPage {params.id}</div>
+  const { id } = await params;
+  return <div>KnowledgeBaseXLSPage {id}</div>
 }

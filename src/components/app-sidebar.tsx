@@ -24,8 +24,8 @@ import { WorkspaceSwitcher } from "@/components/workspace-switcher"
 import { useWorkspace } from "@/hooks/use-workspace"
 const data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
+    name: "Aarib",
+    email: "sayyedaribhussain@gmail.com",
     avatar: "/avatars/shadcn.jpg",
   },
   navMain: [

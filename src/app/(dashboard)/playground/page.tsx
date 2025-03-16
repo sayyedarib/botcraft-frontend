@@ -7,42 +7,20 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
+import { useWebSocket } from "@/hooks/use-websocket"
 
-type Message = {
-  id: string
-  text: string
-  isUser: boolean
-  timestamp: Date
-}
 
 export default function Playground() {
   const [input, setInput] = useState("")
-  const [messages, setMessages] = useState<Message[]>([])
+  const { conversation, sendMessage } = useWebSocket({path: "playground/chat"});
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (!input.trim()) return
+    
+    sendMessage(input);
 
-    const newMessage: Message = {
-      id: crypto.randomUUID(),
-      text: input,
-      isUser: true,
-      timestamp: new Date()
-    }
-
-    setMessages(prev => [...prev, newMessage])
-    setInput("")
-
-    // TODO: Add API call for bot response
-    setTimeout(() => {
-      const botResponse: Message = {
-        id: crypto.randomUUID(),
-        text: "This is a sample response",
-        isUser: false,
-        timestamp: new Date()
-      }
-      setMessages(prev => [...prev, botResponse])
-    }, 500)
+    setInput("");
   }
 
   return (
@@ -55,7 +33,7 @@ export default function Playground() {
         <CardContent className="flex-1 flex flex-col p-0">
           <ScrollArea className="flex-1 p-4 min-h-[calc(100vh-270px)] max-h-[calc(100vh-270px)]">
             <div className="space-y-4">
-              {messages.map((message) => (
+              {conversation?.map((message) => (
                 <div
                   key={message.id}
                   className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
