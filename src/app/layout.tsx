@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/providers/query-provider"
 import { Toaster } from "@/components/ui/sonner"
+import Script from "next/script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,6 +34,7 @@ export default function RootLayout({
         <QueryProvider>{children}</QueryProvider>
         <Toaster />
       </body>
+      {/* <Script src="/chatbot.js" workspaceId-attr="67b1c1d1c91e325f5eae3f95" userId-attr="67b1acc5dfb8f257eca95539" strategy="lazyOnload" async/> */}
     </html>
   );
 }

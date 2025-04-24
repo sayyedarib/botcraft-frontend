@@ -9,7 +9,7 @@ class ChatbotUI {
 
     connectWebSocket() {
         // Create WebSocket connection
-        const wsUrl = this.config.wsEndpoint || `${window.location.origin.replace('http', 'ws')}/api/v1/playground/chat`;
+        const wsUrl = this.config.wsEndpoint || `ws://localhost:8000/api/v1/playground/chat`;
         this.ws = new WebSocket(wsUrl);
 
         // Connection opened
@@ -173,6 +173,27 @@ class ChatbotUI {
     }
 }
 
-window.initChatbot = function(config) {
+window.initChatbot = function() {
+    const script = document.querySelector('script[workspaceId-attr]');
+    console.log("workspaceId-attr", script.getAttribute('workspaceId-attr'));
+    console.log("userId-attr", script.getAttribute('userId-attr'));
+
+    const config = {
+        workspaceId: script.getAttribute('workspaceId-attr'),
+        wsEndpoint: `ws://localhost:8000/api/v1/playground/chat`,
+        userId: script.getAttribute('userId-attr'),
+        theme: "light",
+        position: "bottom-right",
+        launcher: true
+    }
+    
     window.chatbotInstance = new ChatbotUI(config);
 };
+
+document.addEventListener('DOMContentLoaded', function() {
+    window.initChatbot();
+});
+
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(window.initChatbot, 1);
+}

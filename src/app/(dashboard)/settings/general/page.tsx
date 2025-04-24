@@ -1,12 +1,13 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import { CodeBlock } from "@/components/ui/code-block"
 
 export default function GeneralSettingsPage() {
     return (
         <div>
             <h1>General Settings</h1>
-            <Button onClick={() => {
+            {/* <Button onClick={() => {
                 fetch("http://localhost:8000/api/v1/script/generate", {
                     method: "POST",
                 })
@@ -24,7 +25,10 @@ export default function GeneralSettingsPage() {
                         // document.head.appendChild(script);
                         eval(data.script);
                     });
-            }}>Trigger Chatbot Script</Button>
+            }}>Trigger Chatbot Script</Button> */}
+            <CodeBlock code={`
+                <script src="/chatbot.js" workspaceId-attr="67b1c1d1c91e325f5eae3f95" userId-attr="67b1acc5dfb8f257eca95539" strategy="lazyOnload" async/>
+            `} />
         </div>
     )
 }

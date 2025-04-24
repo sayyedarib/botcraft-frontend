@@ -11,7 +11,9 @@ export const knowledgeBaseAPI = {
       }
     });
   },
-  getPDFs: (workspace_id: string) => apiClient.get(`/knowledge-base/${workspace_id}`),
+  scrapeLink: ({workspace_id, link}: {workspace_id: string, link: string}) => apiClient.post(`/knowledge-base/link?workspace_id=${workspace_id}`, link),
+  getKnowledgeBasePDFs: (workspace_id: string) => apiClient.get(`/knowledge-base/pdfs?workspace_id=${workspace_id}`),
+  getKnowledgeBaseLinks: (workspace_id: string) => apiClient.get(`/knowledge-base/links?workspace_id=${workspace_id}`),
   deleteKnowledgeBase: (knowledge_base_id: string, workspace_id: string) => 
     apiClient.delete(`/knowledge-base/${knowledge_base_id}?workspace_id=${workspace_id}`)
 }

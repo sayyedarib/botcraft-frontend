@@ -15,13 +15,32 @@ export function useKnowledgeBase() {
     }
   })
 
+  const scrapeLinkMutation = useMutation({
+    mutationFn: (link: string) => {
+      if (!currentWorkspaceId) {
+        throw new Error("No workspace selected")
+      }
+      return knowledgeBaseAPI.scrapeLink({ workspace_id: currentWorkspaceId, link })
+    }
+  })
   const getPDFsQuery = useQuery({
-    queryKey: ["knowledge-base", currentWorkspaceId],
+    queryKey: ["knowledge-base-pdfs", currentWorkspaceId],
     queryFn: () => {
       if (!currentWorkspaceId) {
         throw new Error("No workspace selected")
       }
-      return knowledgeBaseAPI.getPDFs(currentWorkspaceId)
+      return knowledgeBaseAPI.getKnowledgeBasePDFs(currentWorkspaceId)
+    },
+    enabled: !!currentWorkspaceId
+  })
+
+  const getLinksQuery = useQuery({
+    queryKey: ["knowledge-base-links", currentWorkspaceId],
+    queryFn: () => {
+      if (!currentWorkspaceId) {
+        throw new Error("No workspace selected")
+      }
+      return knowledgeBaseAPI.getKnowledgeBaseLinks(currentWorkspaceId)
     },
     enabled: !!currentWorkspaceId
   })
@@ -29,5 +48,7 @@ export function useKnowledgeBase() {
   return useMemo(() => ({
     uploadFileMutation,
     getPDFsQuery,
-  }), [uploadFileMutation, getPDFsQuery])
+    getLinksQuery,
+    scrapeLinkMutation
+  }), [uploadFileMutation, getPDFsQuery, getLinksQuery, scrapeLinkMutation])
 }
