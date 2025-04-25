@@ -19,13 +19,43 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { Workspace } from "@/types/workspace"
+import { useWorkspaceStore } from "@/stores/workspace-store"
+import { Skeleton } from "@/components/ui/skeleton"
+
 export function WorkspaceSwitcher({
   workspaces,
 }: {
   workspaces: Workspace[]
 }) {
   const { isMobile } = useSidebar()
-  const [activeWorkspace, setActiveWorkspace] = React.useState(workspaces[0])
+  const [activeWorkspace, setActiveWorkspace] = React.useState<Workspace | undefined>(undefined)
+
+  // Update active workspace whenever workspaces change
+  React.useEffect(() => {
+    if (workspaces.length > 0 && !activeWorkspace) {
+      setActiveWorkspace(workspaces[0])
+    }
+  }, [workspaces, activeWorkspace])
+  
+  // Show a placeholder while data is loading
+  if (!activeWorkspace) {
+    return (
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton size="lg">
+            <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+              <Skeleton className="size-4" />
+            </div>
+            <div className="grid flex-1 text-left text-sm leading-tight gap-1">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-3 w-16" />
+            </div>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    )
+  }
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -40,9 +70,9 @@ export function WorkspaceSwitcher({
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">
-                  {activeWorkspace?.name}
+                  {activeWorkspace.name}
                 </span>
-                  <span className="truncate text-xs">{activeWorkspace?.members.length} members</span>
+                <span className="truncate text-xs">{activeWorkspace.members.length} members</span>
               </div>
               <ChevronsUpDown className="ml-auto" />
             </SidebarMenuButton>
@@ -58,14 +88,14 @@ export function WorkspaceSwitcher({
             </DropdownMenuLabel>
             {workspaces.map((workspace, index) => (
               <DropdownMenuItem
-                key={workspace?._id}
+                key={workspace._id}
                 onClick={() => setActiveWorkspace(workspace)}
                 className="gap-2 p-2"
               >
                 <div className="flex size-6 items-center justify-center rounded-sm border">
                   <User className="size-4 shrink-0" />
                 </div>
-                {workspace?.name}
+                {workspace.name}
                 <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
               </DropdownMenuItem>
             ))}
