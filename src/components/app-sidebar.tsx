@@ -91,8 +91,8 @@ const data = {
           url: "/settings/advanced",
         },
         {
-          title: "Webhooks",
-          url: "/settings/webhooks",
+          title: "Theme",
+          url: "/settings/theme",
         },
         {
           title: "Billing",
