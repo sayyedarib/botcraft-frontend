@@ -121,8 +121,6 @@ export default function KnowledgeBaseLinksPage() {
   const { getLinksQuery, scrapeLinkMutation } = useKnowledgeBase()
   const { data, isLoading, isError, isSuccess } = getLinksQuery
 
-  console.log("data: ", data)
-
   const [link, setLink] = React.useState<string>("")
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(

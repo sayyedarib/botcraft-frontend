@@ -36,10 +36,12 @@ export function CodeBlock({
     <div className="relative group rounded-md max-w-full">
       <pre
         ref={preRef}
+        data-slot="code-block"
         className={cn(
           "relative overflow-auto rounded-md border border-border bg-muted p-2 text-sm",
           showLineNumbers && "pl-12",
           "scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent",
+          "ring-ring/10 dark:ring-ring/20 dark:outline-ring/40 outline-ring/50 focus-visible:ring-4 focus-visible:outline-1",
           className
         )}
         {...props}
@@ -59,13 +61,23 @@ export function CodeBlock({
       </pre>
       <button
         onClick={copyToClipboard}
-        className="absolute right-3 top-3 rounded-md border border-border bg-background p-1.5 text-muted-foreground opacity-0 transition-opacity hover:bg-accent hover:text-accent-foreground focus:opacity-100 group-hover:opacity-100"
+        data-slot="copy-button"
+        className={cn(
+          "absolute right-3 top-3 rounded-md border border-border bg-background p-1.5",
+          "text-muted-foreground opacity-0 transition-[opacity,color,box-shadow]",
+          "hover:bg-accent hover:text-accent-foreground focus:opacity-100 group-hover:opacity-100",
+          "ring-ring/10 dark:ring-ring/20 dark:outline-ring/40 outline-ring/50 focus-visible:ring-4 focus-visible:outline-1",
+          "disabled:pointer-events-none disabled:opacity-50"
+        )}
         aria-label="Copy code"
       >
         {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
       </button>
       {language && (
-        <div className="absolute right-3 bottom-3 rounded px-1.5 py-0.5 text-xs text-muted-foreground bg-muted border border-border">
+        <div 
+          data-slot="language-badge"
+          className="absolute right-3 bottom-3 rounded px-1.5 py-0.5 text-xs text-muted-foreground bg-muted border border-border"
+        >
           {language}
         </div>
       )}

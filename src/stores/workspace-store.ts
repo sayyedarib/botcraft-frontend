@@ -9,6 +9,7 @@ type WorkspaceState = {
   workspaces: Workspace[]
   isLoading: boolean
   error: string | null
+  themeId: string | null
 }
 
 type WorkspaceActions = {
@@ -22,7 +23,8 @@ const initialState: WorkspaceState = {
   currentWorkspaceId: null,
   workspaces: [],
   isLoading: false,
-  error: null
+  error: null,
+  themeId: null
 }
 
 export const useWorkspaceStore = create<WorkspaceState & WorkspaceActions>()(
@@ -31,13 +33,17 @@ export const useWorkspaceStore = create<WorkspaceState & WorkspaceActions>()(
       immer((set, get) => ({
         ...initialState,
         
+        // TODO: Rename or refactor this bcz it's handling the themeId as well.
         setCurrentWorkspaceId: (id) => {
           const exists = get().workspaces.some(ws => ws._id === id)
+          const themeId = get().workspaces.find((ws: Workspace) => ws._id === id)?.theme_id
+
           if (!exists) {
             console.error('Workspace not found')
             return
           }
-          set({ currentWorkspaceId: id })
+
+          set({ currentWorkspaceId: id, themeId: themeId })
         },
         
         clearCurrentWorkspace: () => {
@@ -49,6 +55,7 @@ export const useWorkspaceStore = create<WorkspaceState & WorkspaceActions>()(
             state.workspaces.push(workspace)
             if (!state.currentWorkspaceId) {
               state.currentWorkspaceId = workspace._id
+              state.themeId = workspace.theme_id
             }
           })
         },
@@ -58,6 +65,7 @@ export const useWorkspaceStore = create<WorkspaceState & WorkspaceActions>()(
             state.workspaces = state.workspaces.filter((ws: Workspace) => ws._id !== id)
             if (state.currentWorkspaceId === id) {
               state.currentWorkspaceId = null
+              state.themeId = null
             }
           })
         }
@@ -67,6 +75,7 @@ export const useWorkspaceStore = create<WorkspaceState & WorkspaceActions>()(
         storage: createJSONStorage(() => sessionStorage), // Use sessionStorage instead of localStorage
         partialize: (state) => ({ 
           currentWorkspaceId: state.currentWorkspaceId,
+          themeId: state.themeId,
           workspaces: state.workspaces
         })
       }
@@ -75,9 +84,11 @@ export const useWorkspaceStore = create<WorkspaceState & WorkspaceActions>()(
   )
 )
 
-// Selectors for optimized component usage
 export const useCurrentWorkspace = () => useWorkspaceStore((state) => {
-  return state.workspaces.find((ws: Workspace) => ws._id === state.currentWorkspaceId) || null
+  return {
+    workspace: state.workspaces.find((ws: Workspace) => ws._id === state.currentWorkspaceId) || null,
+    themeId: state.themeId
+  }
 })
 
 export const useWorkspaces = () => useWorkspaceStore((state) => state.workspaces)

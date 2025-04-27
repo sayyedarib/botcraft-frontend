@@ -8,10 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { BotMessageSquare, Send } from "lucide-react";
+import { BotMessageSquare, Send, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-// Chatbot Message Component
+import { defaultTheme } from "@/lib/constants/data";
+import { ThemeConfig } from "@/types/config";
+import { useCurrentWorkspace } from "@/stores/workspace-store";
+import { useTheme } from "@/hooks/use-theme";
 const ChatMessage = ({ 
   text, 
   isUser, 
@@ -43,8 +45,7 @@ const ChatMessage = ({
   );
 };
 
-// Chatbot Preview Component
-const ChatbotPreview = ({ config }: { config: any }) => {
+const ChatbotPreview = ({ config, setConfig }: { config: ThemeConfig, setConfig: (name: string, value: string | boolean) => void }) => {
   const [messages, setMessages] = useState([
     {
       text: "Hello! How can I help you today?",
@@ -91,7 +92,6 @@ const ChatbotPreview = ({ config }: { config: any }) => {
     }, 1000);
   };
 
-  // Determine position styles
   const getPositionStyles = () => {
     switch(config.position) {
       case "top-left":
@@ -123,7 +123,7 @@ const ChatbotPreview = ({ config }: { config: any }) => {
           zIndex: 1000,
           ...getPositionStyles()
         }}
-        className="top-10"
+        className="top-18"
       >
         {/* Header */}
         {config.showHeader && (
@@ -133,6 +133,7 @@ const ChatbotPreview = ({ config }: { config: any }) => {
               borderBottom: "1px solid #e5e7eb",
               backgroundColor: config.theme === "dark" ? "#374151" : "#F9FAFB"
             }}
+            className="flex justify-between items-center"
           >
             <h1 
               style={{ 
@@ -143,6 +144,14 @@ const ChatbotPreview = ({ config }: { config: any }) => {
             >
               {config.headerText}
             </h1>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setConfig("launcher", !config.launcher)}
+              aria-label="Close chatbot"
+            >
+              <X size={16} />
+            </Button>
           </div>
         )}
         
@@ -172,75 +181,42 @@ const ChatbotPreview = ({ config }: { config: any }) => {
         {/* Input form */}
         <form 
           onSubmit={handleSendMessage}
+          className="p-2 border-t border-gray-300"
           style={{
-            padding: "16px",
-            borderTop: "1px solid #e5e7eb",
             backgroundColor: config.theme === "dark" ? "#374151" : "#F9FAFB"
           }}
         >
-          <div style={{ display: "flex", gap: "8px" }}>
+          <div className="flex gap-2">
             <input 
               type="text" 
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder={config.inputPlaceholder}
+              className="flex-1 p-2 border border-gray-300 rounded-md bg-white text-black"
               style={{
-                flex: 1,
-                padding: "8px",
-                border: "1px solid #e5e7eb",
-                borderRadius: "6px",
-                backgroundColor: config.theme === "dark" ? "#1F2937" : "white",
+                backgroundColor: config.theme === "dark" ? "#374151" : "#F9FAFB",
                 color: config.theme === "dark" ? "white" : config.textColor
               }}
             />
             <Button 
               type="submit"
               size="icon"
-              style={{
-                backgroundColor: config.primaryColor,
-                color: "white",
-                borderRadius: "6px"
-              }}
+              className="bg-blue-500 text-white rounded-md"
             >
               <Send size={16} />
             </Button>
           </div>
         </form>
       </div>
-      
-      {/* Launcher Button (if enabled) */}
-      {config.launcher && (
-        <div 
-          style={{
-            position: "absolute",
-            bottom: config.position.includes("top") ? "auto" : "20px",
-            top: config.position.includes("top") ? "20px" : "auto",
-            right: config.position.includes("left") ? "auto" : "20px",
-            left: config.position.includes("left") ? "20px" : "auto",
-            width: "50px",
-            height: "50px",
-            borderRadius: "50%",
-            backgroundColor: config.primaryColor,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-            zIndex: 999
-          }}
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4 12C4 11.4477 4.44772 11 5 11H19C19.5523 11 20 11.4477 20 12C20 12.5523 19.5523 13 19 13H5C4.44772 13 4 12.5523 4 12Z" fill="white"/>
-            <path d="M4 8C4 7.44772 4.44772 7 5 7H19C19.5523 7 20 7.44772 20 8C20 8.55228 19.5523 9 19 9H5C4.44772 9 4 8.55228 4 8Z" fill="white"/>
-            <path d="M5 15C4.44772 15 4 15.4477 4 16C4 16.5523 4.44772 17 5 17H19C19.5523 17 20 16.5523 20 16C20 15.4477 19.5523 15 19 15H5Z" fill="white"/>
-          </svg>
-        </div>
-      )}
     </div>
   );
 };
 
 export default function ThemeSettingsPage() {
+  // const { getThemeQuery, updateThemeMutation } = useTheme();
+  // const themeConfig = getThemeQuery;
+  // console.log("themeConfig: ", themeConfig);
+
   const [config, setConfig] = useState({
     theme: "light",
     position: "bottom-right",
@@ -253,12 +229,25 @@ export default function ThemeSettingsPage() {
     height: "500px",
     borderRadius: "8px",
     launcher: true,
-    showHeader: true,
+    showHeader: true
   });
   
   const handleChange = (name: string, value: string | boolean) => {
     setConfig(prev => ({ ...prev, [name]: value }));
   };
+
+  const handleReset = () => {
+    setConfig(defaultTheme);
+  };
+
+  const handleSave = () => {
+    console.log(config);
+    // updateThemeMutation?.mutate({
+    //   ...config,
+    //   theme_id: themeId
+    // });
+  };
+
   
 //   const generateEmbedCode = () => {
 //     return `<script
@@ -516,6 +505,10 @@ export default function ThemeSettingsPage() {
               </div>
             </CardContent>
           </Card> */}
+          <div className="flex gap-2">
+            <Button className="w-full" variant="outline" onClick={handleReset}>Reset</Button>
+            <Button className="w-full" onClick={handleSave}>Save</Button>
+          </div>
         </div>
         
         <div className="min-h-[700px] relative">
@@ -525,9 +518,9 @@ export default function ThemeSettingsPage() {
               <CardDescription>Live preview of your chatbot</CardDescription>
             </CardHeader>
             <CardContent className="flex-1 p-0">
-              {/* <ChatbotPreview config={config} /> */}
+              {config.launcher && <ChatbotPreview config={config} setConfig={handleChange} />}
             
-              <BotMessageSquare className={cn("absolute bottom-10 right-10 size-10 text-blue-500 rounded-full")}/>
+              <BotMessageSquare className={cn("absolute bottom-10 right-10 size-10 text-blue-500 rounded-full cursor-pointer")} onClick={() => handleChange("launcher", !config.launcher)}/>
             </CardContent>
           </Card>
         </div>
