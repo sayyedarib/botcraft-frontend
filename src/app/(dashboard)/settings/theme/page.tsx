@@ -14,6 +14,7 @@ import { defaultTheme } from "@/lib/constants/data";
 import { ThemeConfig } from "@/types/config";
 import { useCurrentWorkspace } from "@/stores/workspace-store";
 import { useTheme } from "@/hooks/use-theme";
+
 const ChatMessage = ({ 
   text, 
   isUser, 
@@ -201,7 +202,10 @@ const ChatbotPreview = ({ config, setConfig }: { config: ThemeConfig, setConfig:
             <Button 
               type="submit"
               size="icon"
-              className="bg-blue-500 text-white rounded-md"
+              className="text-white rounded-md"
+              style={{
+                backgroundColor: config.primaryColor,
+              }}
             >
               <Send size={16} />
             </Button>
@@ -213,25 +217,24 @@ const ChatbotPreview = ({ config, setConfig }: { config: ThemeConfig, setConfig:
 };
 
 export default function ThemeSettingsPage() {
-  // const { getThemeQuery, updateThemeMutation } = useTheme();
-  // const themeConfig = getThemeQuery;
-  // console.log("themeConfig: ", themeConfig);
-
-  const [config, setConfig] = useState({
-    theme: "light",
-    position: "bottom-right",
-    primaryColor: "#3B82F6",
-    secondaryColor: "#F3F4F6",
-    textColor: "#000000",
-    headerText: "Chatbot",
-    inputPlaceholder: "Type your message...",
-    width: "350px",
-    height: "500px",
-    borderRadius: "8px",
-    launcher: true,
-    showHeader: true
-  });
+  const { getThemeQuery, updateThemeMutation } = useTheme();
+  const {data: themeConfig} = getThemeQuery;
+  const [config, setConfig] = useState(themeConfig ?? defaultTheme);
   
+
+  if(getThemeQuery?.isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if(getThemeQuery?.error) {
+    return <div>Error: {getThemeQuery?.error?.message}</div>;
+  }
+
+  if(!getThemeQuery?.data) {
+    return <div>No data</div>;
+  }
+
+
   const handleChange = (name: string, value: string | boolean) => {
     setConfig(prev => ({ ...prev, [name]: value }));
   };
@@ -242,10 +245,7 @@ export default function ThemeSettingsPage() {
 
   const handleSave = () => {
     console.log(config);
-    // updateThemeMutation?.mutate({
-    //   ...config,
-    //   theme_id: themeId
-    // });
+    updateThemeMutation.mutate(config);
   };
 
   
@@ -520,7 +520,7 @@ export default function ThemeSettingsPage() {
             <CardContent className="flex-1 p-0">
               {config.launcher && <ChatbotPreview config={config} setConfig={handleChange} />}
             
-              <BotMessageSquare className={cn("absolute bottom-10 right-10 size-10 text-blue-500 rounded-full cursor-pointer")} onClick={() => handleChange("launcher", !config.launcher)}/>
+              <BotMessageSquare style={{ color: config.primaryColor }} className={cn("absolute bottom-10 right-10 size-10 rounded-full cursor-pointer")} onClick={() => handleChange("launcher", !config.launcher)}/>
             </CardContent>
           </Card>
         </div>

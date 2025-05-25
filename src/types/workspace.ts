@@ -7,7 +7,8 @@ export type Workspace = {
   members: string[]
   created_at: Date
   updated_at: Date
-  theme_id: string
+  theme_config_id: string
+  advanced_config_id: string
 }
 
 export type WorkspaceCreate = {

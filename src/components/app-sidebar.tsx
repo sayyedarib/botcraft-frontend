@@ -8,6 +8,7 @@ import {
   Send,
   Settings2,
   SquareTerminal,
+  BarChart,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -29,6 +30,26 @@ const data = {
     avatar: "/avatars/shadcn.jpg",
   },
   navMain: [
+    {
+      title: "Analytics",
+      url: "/analytics",
+      icon: BarChart,
+      isActive: false,
+      // items: [
+      //   {
+      //     title: "History",
+      //     url: "#",
+      //   },
+      //   {
+      //     title: "Starred",
+      //     url: "#",
+      //   },
+      //   {
+      //     title: "Settings",
+      //     url: "#",
+      //   },
+      // ],
+    },
     {
       title: "Playground",
       url: "/playground",

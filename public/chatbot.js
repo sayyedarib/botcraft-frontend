@@ -1,9 +1,25 @@
 class ChatbotUI {
     constructor(config) {
         this.config = config;
-        this.initUI();
+        this.isOpen = false;
         this.messages = [];
         this.ws = null;
+        this.defaultTheme = {
+            border_radius: "8px",
+            header_text: "Chatbot",
+            height: "500px",
+            input_placeholder: "Type your message...",
+            launcher: true,
+            position: "bottom-right",
+            primary_color: "#3B82F6",
+            secondary_color: "#3B82F6",
+            show_header: true,
+            text_color: "#000000",
+            theme: "light",
+            width: "350px"
+        };
+        this.theme = { ...this.defaultTheme };
+        this.initUI();
         this.connectWebSocket();
     }
 
@@ -16,7 +32,7 @@ class ChatbotUI {
         this.ws.onopen = () => {
             console.log('WebSocket connection established');
             this.addMessage({
-                text: "Connected to chatbot! How can I help you?",
+                text: "Hello! How can I help you today?",
                 isUser: false,
                 timestamp: new Date()
             });
@@ -54,7 +70,21 @@ class ChatbotUI {
         };
     }
 
-    initUI() {
+    async fetchTheme() {
+        try {
+            const response = await fetch(`http://localhost:8000/api/v1/theme?workspace_id=${this.config.workspaceId}`);
+            if (!response.ok) throw new Error('Failed to fetch theme');
+            const data = await response.json();
+            this.theme = { ...this.defaultTheme, ...data };
+        } catch (error) {
+            console.error("Error fetching theme:", error);
+            // Keep using default theme
+        }
+    }
+
+    async initUI() {
+        await this.fetchTheme();
+
         // Create chat container
         this.container = document.createElement('div');
         this.container.id = 'chatbot-container';
@@ -64,12 +94,19 @@ class ChatbotUI {
         const card = document.createElement('div');
         card.className = 'flex-1 flex flex-col';
         
-        // Card header
+        // Card header with close button
         const cardHeader = document.createElement('div');
-        cardHeader.className = 'p-4 border-b';
+        cardHeader.className = 'p-4 border-b flex justify-between items-center';
+        cardHeader.style.display = this.theme.show_header ? 'flex' : 'none';
         cardHeader.innerHTML = `
-            <h1 class="text-xl font-semibold">Chatbot</h1>
+            <h1 class="text-xl font-semibold" style="color: ${this.theme.text_color}">${this.theme.header_text}</h1>
+            <button class="chatbot-close-btn">&times;</button>
         `;
+        
+        // Add close button functionality
+        cardHeader.querySelector('.chatbot-close-btn').addEventListener('click', () => {
+            this.toggleChatbot(false);
+        });
         
         // Card content
         const cardContent = document.createElement('div');
@@ -89,11 +126,17 @@ class ChatbotUI {
         
         this.input = document.createElement('input');
         this.input.className = 'flex-1 p-2 border rounded';
-        this.input.placeholder = 'Type your message...';
+        this.input.placeholder = this.theme.input_placeholder;
         
         const submitButton = document.createElement('button');
-        submitButton.className = 'p-2 bg-blue-500 text-white rounded';
-        submitButton.innerHTML = 'Send';
+        submitButton.className = 'p-2 text-white rounded flex items-center justify-center';
+        submitButton.style.backgroundColor = this.theme.primary_color;
+        submitButton.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 2L11 13"></path>
+                <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
+            </svg>
+        `;
         
         // Assemble components
         inputContainer.appendChild(this.input);
@@ -109,14 +152,84 @@ class ChatbotUI {
         this.container.style.position = 'fixed';
         this.container.style.bottom = '20px';
         this.container.style.right = '20px';
-        this.container.style.width = '350px';
-        this.container.style.height = '500px';
-        this.container.style.backgroundColor = 'white';
+        this.container.style.width = this.theme.width;
+        this.container.style.height = this.theme.height;
+        this.container.style.backgroundColor = this.theme.theme === 'dark' ? '#1a1a1a' : 'white';
         this.container.style.boxShadow = '0 0 10px rgba(0,0,0,0.1)';
-        this.container.style.borderRadius = '8px';
+        this.container.style.borderRadius = this.theme.border_radius;
         this.container.style.zIndex = '1000';
+        this.container.style.display = 'none';
         
+        // Create bot launcher icon
+        if (this.theme.launcher) {
+            this.launcher = document.createElement('div');
+            this.launcher.className = 'chatbot-launcher';
+            this.launcher.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    <line x1="9" y1="9" x2="15" y2="9"></line>
+                    <line x1="9" y1="13" x2="15" y2="13"></line>
+                </svg>
+            `;
+            this.launcher.style.position = 'fixed';
+            this.launcher.style.bottom = '20px';
+            this.launcher.style.right = '20px';
+            this.launcher.style.width = '50px';
+            this.launcher.style.height = '50px';
+            this.launcher.style.backgroundColor = this.theme.primary_color;
+            this.launcher.style.borderRadius = '50%';
+            this.launcher.style.display = 'flex';
+            this.launcher.style.alignItems = 'center';
+            this.launcher.style.justifyContent = 'center';
+            this.launcher.style.cursor = 'pointer';
+            this.launcher.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+            this.launcher.style.zIndex = '999';
+            this.launcher.style.color = 'white';
+            
+            this.launcher.addEventListener('click', () => {
+                this.toggleChatbot(true);
+            });
+            
+            document.body.appendChild(this.launcher);
+        }
+        
+        // Add CSS for styling
+        const style = document.createElement('style');
+        style.textContent = `
+            .chatbot-close-btn {
+                background: none;
+                border: none;
+                font-size: 20px;
+                cursor: pointer;
+                color: ${this.theme.text_color};
+            }
+            .chatbot-close-btn:hover {
+                opacity: 0.8;
+            }
+            #chatbot-container {
+                transition: all 0.3s ease;
+                overflow: hidden;
+            }
+            .chatbot-launcher {
+                transition: all 0.3s ease;
+            }
+            .chatbot-launcher:hover {
+                transform: scale(1.05);
+            }
+        `;
+        
+        document.head.appendChild(style);
         document.body.appendChild(this.container);
+    }
+
+    toggleChatbot(show) {
+        this.isOpen = show !== undefined ? show : !this.isOpen;
+        this.container.style.display = this.isOpen ? 'flex' : 'none';
+        if (this.isOpen) {
+            this.input.focus();
+            // Scroll to bottom of message area
+            this.messageArea.scrollTop = this.messageArea.scrollHeight;
+        }
     }
 
     handleSubmit(e) {
@@ -151,9 +264,9 @@ class ChatbotUI {
         messageElement.className = `flex ${message.isUser ? 'justify-end' : 'justify-start'} mb-4`;
         
         const bubble = document.createElement('div');
-        bubble.className = `max-w-[80%] rounded-lg p-3 ${
-            message.isUser ? 'bg-blue-500 text-white' : 'bg-gray-100'
-        }`;
+        bubble.className = `max-w-[80%] rounded-lg p-3`;
+        bubble.style.backgroundColor = message.isUser ? this.theme.primary_color : (this.theme.theme === 'dark' ? '#2d2d2d' : '#f3f4f6');
+        bubble.style.color = message.isUser ? 'white' : this.theme.text_color;
         
         const text = document.createElement('p');
         text.className = 'text-sm';
@@ -166,10 +279,11 @@ class ChatbotUI {
         bubble.appendChild(text);
         bubble.appendChild(timestamp);
         messageElement.appendChild(bubble);
-        this.messageArea.appendChild(messageElement);
-        
-        // Scroll to bottom
-        this.messageArea.scrollTop = this.messageArea.scrollHeight;
+
+        if (this.messageArea) {
+            this.messageArea.appendChild(messageElement);
+            this.messageArea.scrollTop = this.messageArea?.scrollHeight;
+        }        
     }
 }
 

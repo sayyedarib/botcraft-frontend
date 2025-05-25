@@ -56,12 +56,12 @@ const modelPerformanceData = [
 ];
 
 const modelMetrics = {
-  currentAccuracy: 89,
+  currentAccuracy: 83,
   bestAccuracy: 89,
   averageResponseTime: 0.8,
-  modelSize: "1.2GB",
+  modelSize: "16GB",
   lastTrainingDate: "2024-03-07",
-  totalTrainingTime: "2.5 hours"
+  totalTrainingTime: "4 hours"
 };
 
 export default function AnalyticsPage() {
