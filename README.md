@@ -1,42 +1,176 @@
+# Botcraft — RAG Chatbot Platform (Dashboard)
 
+> The web dashboard for [Botcraft](https://github.com/sayyedarib/botcraft): upload a knowledge base,
+> tune the RAG pipeline, test the bot in a live playground, theme the widget, and copy an embed
+> snippet onto your site.
 
+Built with **Next.js 15 (App Router)**, **React 19**, **TypeScript**, **Tailwind CSS v4**,
+**shadcn/ui**, **TanStack Query**, and **Zustand**.
+
+**Backend repo:** [sayyedarib/botcraft](https://github.com/sayyedarib/botcraft)
+
+## Demo
 
 https://github.com/user-attachments/assets/54d84790-75c6-422e-96ae-de04889a3490
 
+---
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Why this project is interesting
 
-## Getting Started
+- **A real product surface, not a toy CRUD app** — 22 routes covering auth, onboarding, a
+  multi-source knowledge base, analytics, a live WebSocket playground, and a theming studio.
+- **Deliberate state boundaries.** Server state (workspaces, knowledge base, config) lives in
+  TanStack Query with cache invalidation; client-only state (active workspace) lives in a persisted
+  Zustand store. Neither leaks into the other.
+- **Runtime-configurable ML pipeline from the UI.** The Advanced Settings page exposes chunk size,
+  overlap, splitter, PDF parser, embedding model, LoRA/QLoRA fine-tuning parameters, temperature, and
+  the system prompt — all validated with Zod before hitting the API.
+- **Live theming.** Theme colors are converted to CSS custom properties at runtime, so the widget
+  preview updates instantly without a rebuild.
+- **Type-safe end to end** — TypeScript throughout, Zod schemas on every form, typed API client.
 
-First, run the development server:
+---
+
+## Features
+
+| Page | What it does |
+|---|---|
+| **Auth** (`/login`, `/signup`, `/forgot-password`, `/reset-password`) | Cookie-based session auth; middleware guards `/dashboard/*` |
+| **Onboarding** (`/onboarding`) | Guided first-run flow to create a workspace |
+| **Dashboard** (`/dashboard`) | Usage overview with Recharts visualizations |
+| **Analytics** (`/analytics`) | Conversation and retrieval metrics |
+| **Knowledge base** (`/knowledge-base`) | Manage PDFs, links, spreadsheets, and images — sortable, filterable TanStack Tables with per-source detail views |
+| **Playground** (`/playground`) | Live chat against your knowledge base over a WebSocket |
+| **General settings** (`/settings/general`) | Workspace name and the copy-paste embed `<script>` snippet |
+| **Advanced settings** (`/settings/advanced`) | Full RAG pipeline configuration |
+| **Theme settings** (`/settings/theme`) | Widget colors with live preview |
+
+---
+
+## Tech stack
+
+| Layer | Choice | Why |
+|---|---|---|
+| Framework | Next.js 15 App Router + Turbopack | Server components by default; route groups keep auth and dashboard layouts separate |
+| UI | React 19, Tailwind CSS v4, shadcn/ui (47 components) | Owned, themeable primitives rather than an opaque component library |
+| Server state | TanStack Query v5 | Caching, background refetch, and invalidation instead of hand-rolled `useEffect` fetching |
+| Client state | Zustand + `persist` + `immer` | Active workspace survives reloads; immer keeps updates readable |
+| Forms | React Hook Form + Zod | One schema drives both validation and inferred TypeScript types |
+| Tables | TanStack Table v8 | Sorting, filtering, column visibility, pagination |
+| Charts | Recharts | Composable, themeable via CSS variables |
+| HTTP | Axios (`withCredentials`) | Sends the HTTP-only auth cookie on every request |
+
+---
+
+## Getting started
+
+### Prerequisites
+
+- **Node.js 18.18+** (developed on 20.x)
+- The **[Botcraft backend](https://github.com/sayyedarib/botcraft)** running on `http://localhost:8000`
+
+### 1. Clone and install
+
+```bash
+git clone https://github.com/sayyedarib/botcraft-frontend.git
+cd botcraft-frontend
+
+npm install
+```
+
+### 2. Configure environment
+
+```bash
+cp .env.example .env.local
+```
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `NEXT_PUBLIC_API_URL` | `http://localhost:8000` | Base URL of the Botcraft API. The playground WebSocket URL is derived from this, so `https://` automatically becomes `wss://` in production. |
+| `NEXT_PUBLIC_API_V1_STR` | `api/v1` | API version prefix; must match the backend's `API_V1_STR`. |
+
+### 3. Run
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000. Sign up, complete onboarding to create a workspace, then upload a
+document under **Knowledge base** and try it in the **Playground**.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Other commands
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build    # production build
+npm run start    # serve the production build
+npm run lint     # ESLint
+```
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Project structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+src/
+├── app/
+│   ├── (auth)/              # Route group: login, signup, password reset
+│   ├── (dashboard)/         # Route group: shares the sidebar layout
+│   │   ├── dashboard/       analytics/       playground/
+│   │   ├── knowledge-base/  # pdfs · links · images · xls, each with [id] detail
+│   │   └── settings/        # general · advanced · theme
+│   ├── onboarding/
+│   └── layout.tsx           # Root layout, providers, fonts
+├── components/
+│   ├── ui/                  # 47 shadcn/ui primitives
+│   ├── charts/              # Recharts wrappers
+│   ├── auth/                onboarding/
+│   └── app-sidebar.tsx      workspace-switcher.tsx      nav-*.tsx
+├── hooks/                   # use-auth, use-workspace, use-knowledge-base,
+│                            # use-advanced-config, use-theme, use-websocket
+├── lib/
+│   ├── api/
+│   │   ├── endpoints/       # client.ts (axios) + one module per resource
+│   │   └── base.ts
+│   ├── validations/         # Zod schemas
+│   ├── constants/           # routes, static data
+│   └── utils.ts             # `cn()` class merger
+├── stores/workspace-store.ts   # Zustand, persisted
+├── providers/query-provider.tsx
+├── types/                   # Shared TypeScript types
+└── middleware.ts            # Redirects unauthenticated users off /dashboard/*
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+public/
+└── chatbot.js               # The embeddable widget script
+```
 
-## Deploy on Vercel
+### Conventions
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Route groups** — `(auth)` and `(dashboard)` share layouts without adding URL segments.
+- **One hook per resource** — each `hooks/use-*.ts` wraps the matching `lib/api/endpoints/*` module
+  and owns its query keys and invalidation, so components never call Axios directly.
+- **Zod as the source of truth** — form schemas infer their TypeScript types via `z.infer`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## How auth works
+
+1. Login posts to the backend, which sets an HTTP-only `access_token` cookie.
+2. `middleware.ts` checks for that cookie on `/dashboard/*` and redirects to `/login` if it's absent.
+3. The Axios client sends `withCredentials: true`, so the cookie rides along on every API call.
+
+Because the token is HTTP-only, it is never readable from JavaScript — which rules out token theft
+via XSS.
+
+---
+
+## Roadmap
+
+- [ ] Extend middleware matching to all authenticated routes (currently `/dashboard/*` only)
+- [ ] Optimistic updates for knowledge-base uploads
+- [ ] Auto-reconnect with backoff for the playground WebSocket
+- [ ] Component tests (Vitest + Testing Library) and E2E coverage (Playwright)
+- [ ] Storybook for the `components/ui` primitives
+
+## License
+
+See [LICENSE](./LICENSE).

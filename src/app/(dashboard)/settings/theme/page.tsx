@@ -12,7 +12,6 @@ import { BotMessageSquare, Send, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { defaultTheme } from "@/lib/constants/data";
 import { ThemeConfig } from "@/types/config";
-import { useCurrentWorkspace } from "@/stores/workspace-store";
 import { useTheme } from "@/hooks/use-theme";
 
 const ChatMessage = ({ 
