@@ -17,6 +17,7 @@ type WorkspaceActions = {
   setCurrentWorkspaceId: (id: string) => void
   clearCurrentWorkspace: () => void
   addWorkspace: (workspace: Workspace) => void
+  setWorkspaces: (workspaces: Workspace[]) => void
   removeWorkspace: (id: string) => void
 }
 
@@ -52,15 +53,45 @@ export const useWorkspaceStore = create<WorkspaceState & WorkspaceActions>()(
         },
         
         addWorkspace: (workspace) => {
+          if (!workspace?._id) return
+
           set((state) => {
-            state.workspaces.push(workspace)
+            // Upsert rather than push. This is called from a query callback
+            // that re-runs on every refetch, so a plain push accumulated
+            // duplicates — and the store is persisted, so they survived
+            // reloads and showed up repeatedly in the workspace switcher.
+            const existing = state.workspaces.findIndex(
+              (ws: Workspace) => ws._id === workspace._id
+            )
+            if (existing >= 0) {
+              state.workspaces[existing] = workspace
+            } else {
+              state.workspaces.push(workspace)
+            }
+
             if (!state.currentWorkspaceId) {
               state.currentWorkspaceId = workspace._id
               state.themeId = workspace.theme_config_id
             }
           })
         },
-        
+
+        setWorkspaces: (workspaces) => {
+          set((state) => {
+            state.workspaces = workspaces ?? []
+
+            // Drop a selection that no longer exists (e.g. access revoked).
+            const stillPresent = state.workspaces.some(
+              (ws: Workspace) => ws._id === state.currentWorkspaceId
+            )
+            if (!stillPresent) {
+              const first = state.workspaces[0] ?? null
+              state.currentWorkspaceId = first?._id ?? null
+              state.themeId = first?.theme_config_id ?? null
+            }
+          })
+        },
+
         removeWorkspace: (id) => {
           set((state) => {
             state.workspaces = state.workspaces.filter((ws: Workspace) => ws._id !== id)

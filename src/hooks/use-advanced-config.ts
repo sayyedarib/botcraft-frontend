@@ -8,8 +8,6 @@ export function useAdvancedConfig() {
     const { workspace } = useCurrentWorkspace();
     const workspaceId = workspace?._id;
 
-    console.log("Workspace ID in useAdvancedConfig: ", workspaceId);
-
     const getAdvancedConfigQuery = useQuery({
         queryKey: ["advanced-config", workspaceId],
         queryFn: () => workspaceId ? advancedConfigAPI.getAdvancedConfig(workspaceId) : null,

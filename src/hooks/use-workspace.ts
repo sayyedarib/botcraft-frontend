@@ -4,7 +4,7 @@ import { workspaceAPI } from "@/lib/api/endpoints/workspace"
 import { useWorkspaceStore } from "@/stores/workspace-store"
 
 export function useWorkspace() {
-  const { addWorkspace } = useWorkspaceStore()
+  const { addWorkspace, setWorkspaces } = useWorkspaceStore()
 
   const createWorkspaceMutation = useMutation({
     mutationFn: workspaceAPI.createWorkspace,
@@ -23,7 +23,10 @@ export function useWorkspace() {
     queryKey: ["workspaces"],
     queryFn: async () => {
       const { data } = await workspaceAPI.getWorkspaces();
-      addWorkspace(data[0])
+      // Replace the cached list rather than adding to it. This previously
+      // called addWorkspace(data[0]) on every fetch, which both re-appended
+      // the same workspace on each refetch and ignored all the others.
+      setWorkspaces(data)
       return data;
     }
   })

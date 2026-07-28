@@ -129,6 +129,7 @@ npm test
 | Playground socket | Every message survives a burst, the socket closes on unmount, sends are refused before the handshake completes, and re-renders don't open a second connection |
 | Validation | Signup password rules, password confirmation, and email format |
 | Theming | camelCase colour names become CSS custom properties |
+| Workspace store | Re-adding a workspace updates in place instead of duplicating, a stale selection is re-pointed when the workspace disappears, and removing the active workspace clears the selection |
 
 CI runs lint, `tsc --noEmit`, the unit tests, and a production build on every push.
 

@@ -10,7 +10,10 @@ export function useTheme() {
 
     const getThemeQuery = useQuery({
         queryKey: ["theme_config_id", workspaceId],
-        queryFn: () => themeAPI.getTheme(workspaceId)
+        queryFn: () => themeAPI.getTheme(workspaceId),
+        // Without this the query fires before a workspace is selected and
+        // requests ?workspace_id=undefined, which the API rejects.
+        enabled: !!workspaceId,
     })
 
     const updateThemeMutation = useMutation({
