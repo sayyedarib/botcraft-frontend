@@ -27,7 +27,7 @@ export default function GeneralSettingsPage() {
                     <Card>
                         <CardHeader>
                             <CardTitle>Embed Script</CardTitle>
-                            <CardDescription>Copy this script tag into your website's HTML to embed the chatbot.</CardDescription>
+                            <CardDescription>Copy this script tag into your website&apos;s HTML to embed the chatbot.</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div className="mb-4">
