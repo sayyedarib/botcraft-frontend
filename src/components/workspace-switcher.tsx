@@ -19,7 +19,6 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { Workspace } from "@/types/workspace"
-import { useWorkspaceStore } from "@/stores/workspace-store"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export function WorkspaceSwitcher({
