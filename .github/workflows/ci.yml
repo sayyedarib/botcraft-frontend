@@ -26,6 +26,9 @@ jobs:
       - name: Type check
         run: npx tsc --noEmit
 
+      - name: Unit tests
+        run: npm test
+
       - name: Build
         env:
           NEXT_PUBLIC_API_URL: http://localhost:8000/api/v1

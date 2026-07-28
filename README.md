@@ -100,10 +100,35 @@ document under **Knowledge base** and try it in the **Playground**.
 ### Other commands
 
 ```bash
-npm run build    # production build
-npm run start    # serve the production build
-npm run lint     # ESLint
+npm run build       # production build
+npm run start       # serve the production build
+npm run lint        # ESLint
+npm test            # Vitest unit tests
+npm run test:watch  # Vitest in watch mode
 ```
+
+### Docker
+
+```bash
+docker build --build-arg NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1 -t botcraft-frontend .
+docker run -p 3000:3000 botcraft-frontend
+```
+
+`NEXT_PUBLIC_*` values are inlined at build time, so the API URL is a build
+argument rather than a runtime environment variable.
+
+## Tests
+
+Vitest covers the pure logic — validation schemas, theme-to-CSS-variable
+conversion, and WebSocket URL derivation. The last one matters most in
+deployment: an `https://` API base must yield `wss://`, since a `ws://` socket
+on an HTTPS page is blocked as mixed content.
+
+```bash
+npm test
+```
+
+CI runs lint, `tsc --noEmit`, the unit tests, and a production build on every push.
 
 ---
 

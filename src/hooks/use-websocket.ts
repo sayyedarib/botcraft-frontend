@@ -1,5 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 
+import { resolveWebSocketUrl } from "@/lib/api/ws-url";
+
 interface Conversation {
     id: string
     text: string
@@ -14,12 +16,7 @@ export function useWebSocket({path}: {path: string}) {
 
     const connect = useCallback(() => {
         setIsConnected(true);
-        // Derive the ws:// base from the HTTP API URL (which already includes
-        // the /api/v1 prefix) so this works in deployment — https:// becomes
-        // wss:// automatically.
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
-        const wsBase = apiUrl.replace(/^http/, "ws").replace(/\/$/, "");
-        return new WebSocket(`${wsBase}/${path}`)
+        return new WebSocket(resolveWebSocketUrl(path))
     }, [path]);
 
 
