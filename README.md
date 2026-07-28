@@ -86,8 +86,7 @@ cp .env.example .env.local
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `NEXT_PUBLIC_API_URL` | `http://localhost:8000` | Base URL of the Botcraft API. The playground WebSocket URL is derived from this, so `https://` automatically becomes `wss://` in production. |
-| `NEXT_PUBLIC_API_V1_STR` | `api/v1` | API version prefix; must match the backend's `API_V1_STR`. |
+| `NEXT_PUBLIC_API_URL` | `http://localhost:8000/api/v1` | Base URL of the Botcraft API, including the version prefix and no trailing slash. Every path in `src/lib/api/endpoints` is relative to it, and the playground WebSocket URL is derived from it — so `https://` automatically becomes `wss://` in production. |
 
 ### 3. Run
 
