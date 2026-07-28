@@ -119,14 +119,16 @@ argument rather than a runtime environment variable.
 
 ## Tests
 
-Vitest covers the pure logic — validation schemas, theme-to-CSS-variable
-conversion, and WebSocket URL derivation. The last one matters most in
-deployment: an `https://` API base must yield `wss://`, since a `ws://` socket
-on an HTTPS page is blocked as mixed content.
-
 ```bash
 npm test
 ```
+
+| Area | What's guarded |
+|---|---|
+| WebSocket URL | `https://` yields `wss://` — a `ws://` socket on an HTTPS page is blocked as mixed content |
+| Playground socket | Every message survives a burst, the socket closes on unmount, sends are refused before the handshake completes, and re-renders don't open a second connection |
+| Validation | Signup password rules, password confirmation, and email format |
+| Theming | camelCase colour names become CSS custom properties |
 
 CI runs lint, `tsc --noEmit`, the unit tests, and a production build on every push.
 

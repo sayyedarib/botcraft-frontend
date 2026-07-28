@@ -8,8 +8,10 @@ export default defineConfig({
   // resolves. Harmless in CI, and avoids an ENOTFOUND at startup locally.
   server: { host: "127.0.0.1" },
   test: {
-    environment: "node",
-    include: ["src/**/*.test.ts"],
+    // happy-dom for hook tests. jsdom pulls a CSS stack that fails to load
+    // under the forks pool on Node 20 (ERR_REQUIRE_ESM).
+    environment: "happy-dom",
+    include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
     api: false,
   },
 });
